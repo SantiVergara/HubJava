@@ -1,13 +1,8 @@
-import java.lang.annotation.Repeatable;
 import java.text.NumberFormat;
 import java.time.Clock;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +31,8 @@ public class SummaryJava {
     //Stream API ofrece una técnica para el procesamiento de datos de diferentes maneras,
     // como filtrado, extracción, transformación, con la ayuda del paquete java.util.stream.
 
+    //anymatch y filter
+
     List<Persona> personas = new ArrayList<>();
     Persona persona1 = new Persona("Santi", "Vergara", 21);
     var persona2 = new Persona("Fulanito", "Detal", 25);
@@ -46,6 +43,8 @@ public class SummaryJava {
 
     Stream<Persona> stream = personas.stream();
 
+    //e utiliza para seleccionar elementos de una secuencia que cumplan cierta condición. Toma como argumento un predicado, que es una función que devuelve un valor booleano.
+    // El resultado de filter es un nuevo flujo (Stream) que contiene solo los elementos que cumplen con el predicado.
     List<String> nombres = stream
         // filtrado de los elementos que tienen nombre nullo
         .filter(p -> p.getNombre() != null)
@@ -61,8 +60,39 @@ public class SummaryJava {
     System.out.println("nombres = " + nombres);
 
 
+    List<Integer> numeros = Arrays.asList(1, 2, 3, 4, 5, 6);
 
-    //map y flatmap, reviews anymatch y filter
+    List<Integer> numerosPares = numeros.stream()
+        .filter(n -> n % 2 == 0)
+        .collect(Collectors.toList());
+    System.out.println("\nnumerosPares = " + numerosPares);
+
+    List<Integer> list2 = Arrays.asList(3, 4, 6, 12, 20);
+
+
+    //anyMatch
+    //se utiliza para verificar si al menos un elemento de una secuencia cumple cierta condición. También toma como argumento un predicado y devuelve un valor booleano:
+    // true si al menos un elemento cumple la condición, o false en caso contrario.
+    //verificar si algún elemento en la lista cumple con la condición dada.
+
+
+    boolean hayNumerosPares = numeros.stream().anyMatch(n -> n % 2 == 0);
+    System.out.println("hayNumerosPares = " + hayNumerosPares);
+
+    boolean answer = list2.stream().anyMatch(n -> (n * (n + 1)) / 4 == 5);
+    System.out.println("\nanyMatch: \n" + answer);
+
+    Stream<String> stream1 = Stream.of("Geeks", "fOr",
+        "GEEKSQUIZ", "GeeksforGeeks");
+
+    // comprobar si algún elemento de la lista tiene mayúsculas en el primer índice.
+    boolean answer1 = stream1.anyMatch(str -> Character.isUpperCase(str.charAt(1)));
+    System.out.println(answer1);
+
+
+
+
+    //map y flatmap
 
     //flatMap()
     List<List<Integer>> listaBidimensional = new ArrayList<List<Integer>>(Arrays.asList(
@@ -80,7 +110,7 @@ public class SummaryJava {
         .flatMap(listaInterna -> listaInterna.stream())
         .collect(Collectors.toList());
 
-
+    System.out.println("\nLista con flatMap: ");
     for (Integer n : listaAplanada) {
       System.out.println(n);
     }
@@ -93,6 +123,38 @@ public class SummaryJava {
     // 4
 
 
+    List<Integer> numeros2 = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4)); // [1, 2, 3, 4]
+
+    List<Integer> cuadrados = numeros2
+        .stream()
+        .map(x -> x * x)
+        .collect(Collectors.toList());
+    System.out.println("\nLista con map: ");
+    for (Integer n : cuadrados) {
+      System.out.println(n);
+    }
+
+    // Imprime el cuadrado de los números de entrada. 4 elementos de entrada, 4 de salida
+    // 1
+    // 4
+    // 9
+    // 16
+
+
+    //dada una lista de numeros enteros, sumar esa lista (de 2 formas: con reviews, foreach modificando variable externas variables atómicas )
+
+    //reduce
+    Optional<Integer> suma = numeros.stream().reduce((a, b) -> a + b);
+    System.out.println("\nsuma con reduce()= " + suma);
+
+
+    AtomicInteger suma1 = new AtomicInteger(0);
+    numeros.forEach(numero -> {
+      // Operación utilizando la variable atómica
+      suma1.addAndGet(numero);
+    });
+
+    System.out.println("\nSuma atomic: " + suma.get());
 
 
 
@@ -101,13 +163,12 @@ public class SummaryJava {
     // El bucle ForEach () se puede usar en una clase de colección que extiende la interfaz Iterable. Como este método ingresa un solo parámetro,
     // una expresión lambda también se puede pasar como parámetro.
 
+    System.out.println("\nforEach de edad: ");
     personas.forEach(p -> {
       System.out.println(p.getEdad());
     });
 
-    //dada una lista de numeros enteros, sumar esa lista (de 3 formas: con reviews, foreach modificando variable externas variables atómicas )
 
-    //.....
 
 
     //En Java 8, se ha introducido una nueva API de tiempo y API de fecha donde las fechas de manejo están en un método diferente en
@@ -118,6 +179,7 @@ public class SummaryJava {
     //Clase LocalDateTime
     //Clase de MonthDay
 
+    System.out.println("\nApi de Tiempo");
     Clock cl = Clock.systemDefaultZone();
     System.out.println(cl.getZone());
 
@@ -153,12 +215,94 @@ public class SummaryJava {
     // se suma la posibilidad de lanzar un programa desde el código fuente.
     // Esto es útil para programas pequeños o para los casos de estar aprendiendo el lenguaje.
 
+
+    //Java 12
+    //clase final pública CompactNumberFormat
+    //extiende NumberFormat
+    //CompactNumberFormat es una subclase concreta de NumberFormat que formatea un número decimal en su forma compacta.
+    // El formato de número compacto está diseñado para el entorno donde el espacio es limitado y la cadena formateada se puede mostrar en ese espacio limitado
+
     NumberFormat fmt = NumberFormat.getCompactNumberInstance(
         new Locale("hi", "IN"), NumberFormat.Style.SHORT);
     String result = fmt.format(1000);
-    System.out.println("result = " + result);
+    System.out.println("\nCompactNumberFormat = " + result );
 
 
+
+    // nuevos metodos en la api de String
+    // indent() ajusta la sangría de cada línea de la cadena en función del argumento que se le pasa.
+    String multilineStr = "This is\na multiline\nstring.";
+    String postIndent = multilineStr.indent(3);
+    System.out.println("postIndent = " + postIndent);
+
+    // transform()
+    int result1 = "42".transform(Integer::parseInt);
+    System.out.println("result convertido a entero= " + result1);
+
+
+    //Java 14
+    //Switch expressions:
+    /*Proponemos introducir una nueva forma de etiqueta de cambio, " case L ->", para indicar que solo se ejecutará el código a la derecha de la etiqueta si la etiqueta coincide.
+     También proponemos permitir múltiples constantes por caso, separadas por comas. El código anterior ahora se puede escribir:
+
+    switch (day) {
+      case MONDAY, FRIDAY, SUNDAY -> System.out.println(6);
+      case TUESDAY                -> System.out.println(7);
+      case THURSDAY, SATURDAY     -> System.out.println(8);
+      case WEDNESDAY              -> System.out.println(9);
+    }*/
+    Ejemplo:
+    howMany(1);
+
+    //Java 15
+    //Text blocks:
+    //formatea automáticamente la cadena de una manera predecible y le da al desarrollador control sobre el formato cuando lo desee.
+    //ejemplo SQL: Uso de literales de cadena "unidimensionales"
+
+    String query = "SELECT \"EMP_ID\", \"LAST_NAME\" FROM \"EMPLOYEE_TB\"\n" +
+        "WHERE \"CITY\" = 'INDIANAPOLIS'\n" +
+        "ORDER BY \"EMP_ID\", \"LAST_NAME\";\n";
+
+    //Usar un bloque de texto "bidimensional"
+    String query2 = """
+               SELECT "EMP_ID", "LAST_NAME" FROM "EMPLOYEE_TB"
+               WHERE "CITY" = 'INDIANAPOLIS'
+               ORDER BY "EMP_ID", "LAST_NAME";
+               """;
+
+    //Java 16
+    /*var x = "";
+    //
+    if (x.instanceof String s) { String a = s; }*/
+
+
+    //Java 17
+    //Clases Selladas
+    //Las clases e interfaces selladas restringen qué otras clases o interfaces pueden extenderlas o implementarlas.
+
+    //Java 18
+    //UTF-8 by Default
+    //Con este cambio, las API que dependen del juego de caracteres predeterminado se comportarán de manera uniforme en todas las implementaciones,
+    // sistemas operativos, entornos locales y configuraciones.
+
+
+
+    //Java 18
+    /*
+    * Simple Web Server (a.k.a com.sun.net.httpserver.SimpleFileServer)
+    * SimpleFileServer.createFileServer(new InetSocketAddress(9000), path, logLevel).start();
+    * Cmd Line: jwebserver -p 9000*/
+
+
+  }
+
+
+  static void howMany(int k) {
+    switch (k) {
+      case 1  -> System.out.println("one");
+      case 2  -> System.out.println("two");
+      default -> System.out.println("many");
+    }
   }
 
 }
